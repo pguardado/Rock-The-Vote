@@ -1,0 +1,123 @@
+/* Issue.css */
+
+/* Container for the whole issue component */
+.issue-container {
+  padding: 20px;
+  max-width: 800px;
+  margin: 0 auto;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  background-color: #f9f9f9;
+}
+
+/* Title styling */
+.issue-title {
+  font-size: 24px;
+  font-weight: bold;
+  margin-bottom: 10px;
+}
+
+/* Description styling */
+.issue-description {
+  font-size: 18px;
+  margin-bottom: 20px;
+}
+
+/* Image styling */
+.issue-image {
+  max-width: 100%;
+  height: auto;
+  margin-bottom: 20px;
+}
+
+/* Grouping buttons together */
+.button-group {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+/* Button styling */
+.button-group button {
+  padding: 10px 15px;
+  border: none;
+  border-radius: 5px;
+  color: white;
+  cursor: pointer;
+  font-size: 16px;
+}
+
+.button-group button:hover {
+  opacity: 0.9;
+}
+
+/* Specific button colors */
+.upvote-button {
+  background-color: #4caf50; /* Green */
+}
+
+.downvote-button {
+  background-color: #f44336; /* Red */
+}
+
+.edit-button {
+  background-color: #2196f3; /* Blue */
+}
+
+.delete-button {
+  background-color: #ff9800; /* Orange */
+}
+
+.save-button {
+  background-color: #4caf50; /* Green */
+}
+
+.cancel-button {
+  background-color: #f44336; /* Red */
+}
+
+/* Edit form styling */
+.edit-form input,
+.edit-form textarea {
+  width: 100%;
+  padding: 10px;
+  margin-bottom: 10px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+}
+
+.edit-form button {
+  margin-right: 10px;
+}
+
+/* Comment section styling */
+.comment-section {
+  margin-top: 30px;
+}
+
+/* Comment form styling */
+.comment-form {
+  margin-top: 20px;
+}
+
+.comment-form input,
+.comment-form textarea {
+  width: 100%;
+  padding: 10px;
+  margin-bottom: 10px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+}
+
+.comment-form button {
+  padding: 10px 15px;
+  border: none;
+  border-radius: 5px;
+  background-color: #2196f3; /* Blue */
+  color: white;
+  cursor: pointer;
+}
+
+.comment-form button:hover {
+  opacity: 0.9;
+}
