@@ -17,15 +17,85 @@ export default function UserProvider(props) {
     token: localStorage.getItem("token") || "",
     issues: [],
     publicIssues: [],
+    comments: [], // State for comments
     errMsg: "",
   };
 
   const [userState, setUserState] = useState(initState);
   const [allIssues, setAllIssues] = useState([]);
 
+  // Fetch issues when component mounts
   useEffect(() => {
     getPublicIssues();
   }, []);
+
+  // Fetch public issues
+  async function getPublicIssues() {
+    try {
+      const res = await axios.get("/api/main/issues/public");
+      const issuesWithComments = await Promise.all(
+        res.data.map(async (issue) => {
+          const commentsRes = await userAxios.get(
+            `/api/main/issues/${issue._id}/comments`
+          );
+          return { ...issue, comments: commentsRes.data || [] }; // Ensure comments is an array
+        })
+      );
+      setUserState((prevState) => ({
+        ...prevState,
+        publicIssues: issuesWithComments,
+      }));
+    } catch (error) {
+      console.error(
+        "Error fetching public issues:",
+        error.response?.data || error.message
+      );
+    }
+  }
+
+  // Fetch comments for a specific issue using userAxios (with token)
+  async function getCommentsByIssue(issueId) {
+    try {
+      const res = await userAxios.get(`/api/main/issues/${issueId}/comments`);
+      return res.data || []; // Ensure comments is an array
+    } catch (error) {
+      console.error(
+        "Error fetching comments:",
+        error.response?.data || error.message
+      );
+    }
+  }
+
+  // Function to add a comment for a specific issue
+  async function addComment(issueId, newComment) {
+    try {
+      const res = await userAxios.post(`/api/main/issues/${issueId}/comments`, {
+        text: newComment,
+      });
+
+      // Update the specific issue's comments in the userState
+      setUserState((prevState) => ({
+        ...prevState,
+        issues: prevState.issues.map((issue) =>
+          issue._id === issueId
+            ? { ...issue, comments: [...(issue.comments || []), res.data] }
+            : issue
+        ), // Append the new comment to the correct issue
+      }));
+
+      return res.data; // Return the newly added comment
+    } catch (error) {
+      console.error(
+        "Error adding comment:",
+        error.response?.data || error.message
+      );
+    }
+  }
+
+  // Function to handle fetching comments for a specific issue
+  function fetchComments(issueId) {
+    getCommentsByIssue(issueId);
+  }
 
   async function signup(creds) {
     try {
@@ -119,6 +189,7 @@ export default function UserProvider(props) {
           issue._id === issueId ? res.data : issue
         ),
       }));
+      return res.data; // Return the updated issue data
     } catch (error) {
       console.log("Error during upvote:", error);
     }
@@ -136,6 +207,7 @@ export default function UserProvider(props) {
           issue._id === issueId ? res.data : issue
         ),
       }));
+      return res.data; // Return the updated issue data
     } catch (error) {
       console.log(error);
     }
@@ -159,30 +231,25 @@ export default function UserProvider(props) {
   }
 
   async function deleteIssue(issueId) {
+    // Optimistically update the state before making the API call
+    setUserState((prevState) => ({
+      ...prevState,
+      issues: prevState.issues.filter((issue) => issue._id !== issueId),
+      publicIssues: prevState.publicIssues.filter(
+        (issue) => issue._id !== issueId
+      ),
+    }));
+
     try {
       await userAxios.delete(`/api/main/issues/${issueId}`);
-      setUserState((prevState) => ({
-        ...prevState,
-        issues: prevState.issues.filter((issue) => issue._id !== issueId),
-      }));
     } catch (error) {
       console.log(error);
-    }
-  }
-
-  async function getPublicIssues() {
-    try {
-      const res = await axios.get("/api/main/issues/public");
-      setAllIssues(res.data);
+      // Optionally, you can revert the state update if the API call fails
       setUserState((prevState) => ({
         ...prevState,
-        publicIssues: res.data,
+        issues: [...prevState.issues, { _id: issueId }],
+        publicIssues: [...prevState.publicIssues, { _id: issueId }],
       }));
-    } catch (error) {
-      console.error(
-        "Error fetching public issues:",
-        error.response?.data || error.message
-      );
     }
   }
 
@@ -202,7 +269,9 @@ export default function UserProvider(props) {
         handleDownVote,
         editIssue,
         deleteIssue,
-        allIssues,
+        fetchComments, // Expose fetchComments to fetch comments for an issue
+        addComment, // Expose addComment to allow adding new comments
+        getCommentsByIssue, // Expose getCommentsByIssue to fetch comments for an issue
       }}
     >
       {props.children}

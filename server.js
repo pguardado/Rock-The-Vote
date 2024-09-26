@@ -6,10 +6,12 @@ const { expressjwt } = require("express-jwt");
 
 const app = express();
 
+// Middleware to parse JSON bodies
 app.use(express.json());
 app.use(morgan("dev"));
 
-async function connecttoDb() {
+// Connect to MongoDB
+async function connectToDb() {
   try {
     await mongoose.connect(process.env.MONGO_URI);
     console.log("Connected to db");
@@ -17,26 +19,39 @@ async function connecttoDb() {
     console.log(error);
   }
 }
-connecttoDb();
+connectToDb();
 
-app.use("/api/auth", require("./routes/authRouter"));
-
+// JWT middleware
 const jwtMiddleware = expressjwt({
   secret: process.env.SECRET,
   algorithms: ["HS256"],
 }).unless({
-  path: ["/api/auth", "/api/main/issues/public"],
+  path: [
+    "/api/auth/signup",
+    "/api/auth/login",
+    "/api/main/issues/public",
+    {
+      url: /^\/api\/main\/issues\/[a-fA-F0-9]{24}\/comments$/,
+      methods: ["GET"],
+    },
+  ],
 });
 
+// Apply JWT middleware
+app.use(jwtMiddleware);
+
+// Log request paths
 app.use((req, res, next) => {
   console.log("Request path:", req.path);
   next();
 });
 
-app.use(jwtMiddleware);
-
+// Routes
+app.use("/api/auth", require("./routes/authRouter"));
 app.use("/api/main/issues", require("./routes/issueRouter"));
+app.use("/api/main/issues", require("./routes/commentRouter"));
 
+// Error handling middleware
 app.use((err, req, res, next) => {
   console.error(err.stack);
   if (err.name === "UnauthorizedError") {
@@ -46,6 +61,7 @@ app.use((err, req, res, next) => {
   }
 });
 
+// Start the server
 app.listen(process.env.PORT, () => {
   console.log(`Server is running on port ${process.env.PORT}`);
 });

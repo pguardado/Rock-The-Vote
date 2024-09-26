@@ -1,28 +1,22 @@
-import React, { useContext, useEffect } from "react"; // Importing React, useContext, and useEffect
-import { UserContext } from "../context/UserProvider"; // Importing UserContext for accessing public issues and functions
-import { IssueList } from "./issueList"; // Importing IssueList component to display issues
-import IssueForm from "./IssueForm"; // Importing IssueForm component to add new issues
+import React, { useContext, useEffect } from "react";
+import { UserContext } from "../context/UserProvider";
+import { IssueList } from "./IssueList";
+import IssueForm from "./IssueForm";
 
-// Define the Public component
 function Public() {
-  const { getPublicIssues, publicIssues } = useContext(UserContext); // Destructuring the function and state from UserContext
+  const { getPublicIssues, publicIssues } = useContext(UserContext);
 
-  // useEffect to fetch public issues when the component mounts
   useEffect(() => {
-    getPublicIssues(); // Calling the function to get public issues
-  }, []); // Empty dependency array means this runs once on mount
-
-  console.log(publicIssues); // Logging the public issues to the console for debugging
+    getPublicIssues();
+  }, []);
 
   return (
     <>
-      <h1>Public Issues</h1> {/* Displaying the heading for public issues */}
-      {/* Include the IssueForm if you want users to add new issues */}
-      <IssueForm /> {/* Rendering the form to add new issues */}
-      <IssueList issues={publicIssues} />{" "}
-      {/* Rendering the list of public issues */}
+      <h1>Public Issues</h1>
+      <IssueForm />
+      <IssueList issues={publicIssues} />
     </>
   );
 }
 
-export default Public; // Exporting the Public component
+export default Public;
